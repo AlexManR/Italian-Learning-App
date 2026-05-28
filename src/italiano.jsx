@@ -480,13 +480,13 @@ TEACHING STYLE:
 - Use emojis sparingly to keep the mood warm. 🇮🇹`;
 
     try {
-      const geminiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      const geminiKey = process.env.REACT_APP_GROQ_API_KEY;
       const geminiHistory = newHistory.map(m => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       }));
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/llama-3.1-8b-instant:generateContent?key=${geminiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
