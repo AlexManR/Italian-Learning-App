@@ -447,6 +447,9 @@ export default function Italiano() {
     checkAndUnlock(lessonKey, qCard.level, newMastery);
     setTimeout(() => {
       if (quizStep + 1 >= quiz.length) setQuizDone(true);
+
+
+
       else { setQuizStep(s => s + 1); setSelected(null); }
     }, 900);
   }
@@ -488,7 +491,7 @@ TEACHING STYLE:
           "Authorization": `Bearer ${groqKey}`,
         },
         body: JSON.stringify({
-          model: "llama3-8b-8192",
+          model: "llama-3.1-8b-instant",
           max_tokens: 1000,
           temperature: 0.4,
           messages: [
