@@ -459,14 +459,7 @@ export default function Italiano() {
     const newHistory = [...tutor, { role: "user", content: msg }];
     setTutor(newHistory);
     setTutorLoading(true);
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are Lucia, a friendly and encouraging Italian language tutor for beginners and families.
+    const SYSTEM_PROMPT = `You are Lucia, a friendly and encouraging Italian language tutor for beginners and families.
 
 STRICT RULES — follow these at all times without exception:
 1. You ONLY discuss Italian language learning: vocabulary, grammar, pronunciation, phrases, culture tied to language.
@@ -484,12 +477,28 @@ TEACHING STYLE:
 - When the user writes in Italian (even imperfectly), always praise the effort first, then gently correct.
 - For grammar questions, give a simple explanation with 2–3 short example sentences.
 - Occasionally suggest a quick practice exercise to keep things interactive.
-- Use emojis sparingly to keep the mood warm. 🇮🇹`,
-          messages: newHistory,
+- Use emojis sparingly to keep the mood warm. 🇮🇹`;
+
+    try {
+      const groqKey = process.env.REACT_APP_GROQ_API_KEY;
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${groqKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192",
+          max_tokens: 1000,
+          temperature: 0.4,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...newHistory,
+          ],
         }),
       });
       const data = await res.json();
-      const reply = data.content?.[0]?.text || "Mi dispiace, something went wrong!";
+      const reply = data.choices?.[0]?.message?.content || "Mi dispiace, something went wrong!";
       const updated = [...newHistory, { role: "assistant", content: reply }];
       setTutor(updated);
       speakReply(reply);
