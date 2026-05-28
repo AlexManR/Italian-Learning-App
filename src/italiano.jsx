@@ -447,9 +447,6 @@ export default function Italiano() {
     checkAndUnlock(lessonKey, qCard.level, newMastery);
     setTimeout(() => {
       if (quizStep + 1 >= quiz.length) setQuizDone(true);
-
-
-
       else { setQuizStep(s => s + 1); setSelected(null); }
     }, 900);
   }
@@ -483,25 +480,25 @@ TEACHING STYLE:
 - Use emojis sparingly to keep the mood warm. 🇮🇹`;
 
     try {
-      const groqKey = process.env.REACT_APP_GROQ_API_KEY;
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${groqKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          max_tokens: 1000,
-          temperature: 0.4,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...newHistory,
-          ],
-        }),
-      });
+      const geminiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      const geminiHistory = newHistory.map(m => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: geminiHistory,
+            generationConfig: { temperature: 0.4, maxOutputTokens: 1000 },
+          }),
+        }
+      );
       const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || "Mi dispiace, something went wrong!";
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Mi dispiace, something went wrong!";
       const updated = [...newHistory, { role: "assistant", content: reply }];
       setTutor(updated);
       speakReply(reply);
